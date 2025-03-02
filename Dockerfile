@@ -2,9 +2,11 @@ FROM golang:1.23.6-alpine3.21
 
 WORKDIR /app
 
+RUN apk add --no-cache bash
+
 COPY . .
 
-RUN apk add --no-cache bash
+RUN go mod tidy
 
 RUN go install github.com/air-verse/air@latest
 

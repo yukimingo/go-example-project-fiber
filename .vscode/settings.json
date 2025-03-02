@@ -1,0 +1,30 @@
+{
+  "go.useLanguageServer": true,
+  "go.languageServerExperimentalFeatures": {
+    "diagnostics": true,
+    "format": true,
+    "autoComplete": true,
+    "rename": true,
+    "goToDefinition": true,
+    "hover": true,
+    "signatureHelp": true
+  },
+  "gopls": {
+    "usePlaceholders": true,
+    "staticcheck": true,
+    "gofumpt": true,
+    "analyses": {
+      "nilness": true,
+      "shadow": true,
+      "unusedparams": true,
+      "unusedwrite": true
+    }
+  },
+  "go.formatTool": "gopls",
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": ["--fast"],
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  }
+}

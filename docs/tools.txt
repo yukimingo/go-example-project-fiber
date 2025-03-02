@@ -1,0 +1,227 @@
+1. Air（ホットリロード）
+用途: コード変更を検知して、自動的に再ビルド・再実行するツール。
+
+使用方法:
+
+air を実行するだけで、自動的に変更を監視し、ビルド＆再起動する。
+sh
+コピーする
+編集する
+air
+設定ファイルを生成する（オプション）。
+sh
+コピーする
+編集する
+air init
+生成された .air.toml を編集すれば、監視対象をカスタマイズ可能。
+
+例: ソースコードの変更を検知し、自動リロード
+
+sh
+コピーする
+編集する
+# Goプロジェクトのルートディレクトリで実行
+air
+2. gopls（Go Language Server）
+用途: エディタ向けのGo言語サーバー。コード補完、リファクタリング、定義ジャンプなどを提供。
+
+使用方法: 通常はエディタ（VSCode, Vim, Emacsなど）と連携して自動で動作する。
+
+手動で補完情報を取得したい場合:
+
+sh
+コピーする
+編集する
+gopls completion filename.go
+LSP対応エディタ（VSCode, Neovim, Emacs）で有効化することで、gopls によるコード補完が自動的に機能する。
+
+3. Delve（Goデバッガ）
+用途: Goアプリのデバッグを行うためのツール。ステップ実行、変数確認、ブレークポイント設定などが可能。
+
+使用方法:
+
+デバッグ実行
+sh
+コピーする
+編集する
+dlv debug
+デフォルトでは main.go から起動。
+
+実行中のプログラムにアタッチ
+sh
+コピーする
+編集する
+dlv attach <PID>
+特定のプロセスにデバッガを接続できる。
+
+ブレークポイントの設定
+sh
+コピーする
+編集する
+(dlv) break main.main
+main.main 関数にブレークポイントを設定。
+
+ステップ実行
+sh
+コピーする
+編集する
+(dlv) step
+次のステートメントに進む。
+
+変数の確認
+sh
+コピーする
+編集する
+(dlv) print myVar
+4. golangci-lint（コード静的解析）
+用途: Goの静的解析ツール。golint, govet, errcheck など多数のリンターを統合。
+
+使用方法:
+
+プロジェクトの全コードをチェック
+sh
+コピーする
+編集する
+golangci-lint run
+特定のファイルをチェック
+sh
+コピーする
+編集する
+golangci-lint run ./mypackage/
+特定のリンターを有効化
+sh
+コピーする
+編集する
+golangci-lint run --enable=gofmt,govet
+特定のエラーを無視
+sh
+コピーする
+編集する
+golangci-lint run --disable=errcheck
+5. goimports（import の自動整理）
+用途:
+
+import 文を自動的に整理（不要なものを削除、必要なものを追加）
+gofmt と併用するとコードフォーマットも整えられる。
+使用方法:
+
+手動でフォーマット
+sh
+コピーする
+編集する
+goimports -w myfile.go
+-w オプションをつけると、直接ファイルを書き換える。
+
+ディレクトリ全体を整理
+sh
+コピーする
+編集する
+goimports -w .
+ファイルの変更なしに出力のみ確認
+sh
+コピーする
+編集する
+goimports myfile.go
+6. gotests（テストコードの自動生成）
+用途: 関数のシグネチャを解析し、自動的にテストコードを生成する。
+
+使用方法:
+
+関数ごとにテストを生成
+sh
+コピーする
+編集する
+gotests -w -all myfile.go
+-w を指定すると、テストファイルを自動生成する。
+
+特定の関数だけテストを生成
+sh
+コピーする
+編集する
+gotests -w -only MyFunction myfile.go
+生成されるコード（例）
+
+go
+コピーする
+編集する
+func TestMyFunction(t *testing.T) {
+    type args struct {
+        input string
+    }
+    tests := []struct {
+        name string
+        args args
+        want string
+    }{
+        {"case 1", args{"hello"}, "HELLO"},
+    }
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            if got := MyFunction(tt.args.input); got != tt.want {
+                t.Errorf("MyFunction() = %v, want %v", got, tt.want)
+            }
+        })
+    }
+}
+7. mockgen（モックの自動生成）
+用途: インターフェースを解析し、テスト用のモックを自動生成する。
+
+使用方法:
+
+インターフェースのモックを生成
+sh
+コピーする
+編集する
+mockgen -source=myinterface.go -destination=mocks/mock_myinterface.go -package=mocks
+リフレクションを使ってモックを生成
+sh
+コピーする
+編集する
+mockgen -destination=mocks/mock_db.go -package=mocks database/sql Driver
+元のインターフェース（例）
+
+go
+コピーする
+編集する
+package mypackage
+
+type MyInterface interface {
+    DoSomething(int) string
+}
+自動生成されたモック（例）
+
+go
+コピーする
+編集する
+package mocks
+
+import (
+    "mypackage"
+    "github.com/golang/mock/gomock"
+)
+
+type MockMyInterface struct {
+    ctrl *gomock.Controller
+}
+
+func (m *MockMyInterface) DoSomething(i int) string {
+    ret := m.ctrl.Call(m, "DoSomething", i)
+    return ret[0].(string)
+}
+テストでの利用例
+
+go
+コピーする
+編集する
+func TestMyFunction(t *testing.T) {
+    ctrl := gomock.NewController(t)
+    defer ctrl.Finish()
+
+    mock := mocks.NewMockMyInterface(ctrl)
+    mock.EXPECT().DoSomething(1).Return("mocked result")
+
+    result := myFunction(mock)
+    if result != "mocked result" {
+        t.Errorf("Expected mocked result, got %s", result)
+    }
+}
